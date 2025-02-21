@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
-  <Document name="objectscript-template.ZPM">
+  <Document name="shvarov-copilot-objectscript.ZPM">
     <Module>
-      <Name>objectscript-template</Name>
-      <Version>1.1.2</Version>
+      <Name>shvarov-copilot-objectscript</Name>
+      <Version>1.0.0</Version>
       <Packaging>module</Packaging>
       <SourcesRoot>src</SourcesRoot>
-      <Resource Name="dc.sample.PKG"/>
+      <Resource Name="shvarov.copilot.PKG"/>
+      <Invoke Class="shvarov.copilot.PersistentRest" Method="IntroduceRoleCopilot">
+      </Invoke>
+      <CSPApplication
+        Url="/copilot"
+        DispatchClass="shvarov.copilot.PersistentRest"
+        MatchRoles=":{$dbrole}"
+        PasswordAuthEnabled="0"
+        UnauthenticatedEnabled="1"
+        Recurse="1"
+        UseCookies="2"
+        CookiePath="/copilot"
+       />
     </Module>
   </Document>
 </Export>
