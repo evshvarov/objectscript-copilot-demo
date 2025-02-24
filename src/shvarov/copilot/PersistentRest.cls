@@ -1,6 +1,14 @@
 Class shvarov.copilot.PersistentRest Extends %CSP.REST
 {
 
+ClassMethod SetupSecurity() As %Status
+{
+    Set tSC = $$$OK
+    d ..IntroduceRoleCopilot()
+    d ..AddRole()
+    Quit tSC
+}
+
 ClassMethod IntroduceRoleCopilot() As %Status
 {
     &SQL(CREATE ROLE copilot)
@@ -12,6 +20,44 @@ ClassMethod IntroduceRoleCopilot() As %Status
         Quit $$$ERROR($$$GeneralError, "Error granting privileges: "_SQLCODE)
     }
     Quit $$$OK
+}
+
+ClassMethod AddRole(appname = "/copilot", approle = "copilot") As %Status
+{
+    // Change to the %SYS namespace.
+    new $NAMESPACE
+    set $NAMESPACE="%SYS"
+
+    set status=##class(Security.Applications).Get(appname, .MyAppProps)
+    set MyAppProps("MatchRoles")=MyAppProps("MatchRoles")_":"_approle
+
+    set status=##class(Security.Applications).Modify(appname,.MyAppProps)
+
+    // Announce success.
+    if $$$ISOK(status) {
+        write !, "Roles were successfully modified."
+    }
+    Quit status
+}
+
+ClassMethod ReadRoles(appname = "/copilot") As %Status
+{
+    // Change to the %SYS namespace.
+    new $NAMESPACE
+    set $NAMESPACE="%SYS"
+
+    // Retrieve the current roles for the application.
+    set status=##class(Security.Applications).Get(appname, .MyAppProps)
+
+    // Check if the operation was successful.
+    if $$$ISOK(status) {
+        // Output the current MatchRoles property.
+        write !, "Current roles: ", MyAppProps("MatchRoles")
+    } else {
+        write !, "Failed to retrieve roles."
+    }
+
+    return status
 }
 
 ClassMethod GetRecord(id As %String) As %Status
@@ -74,8 +120,8 @@ ClassMethod GetAllRecords() As %Status
 {
     Set tResult = []
     Set tResultSet = ##class(%SQL.Statement).%ExecDirect(,"SELECT ID, Name, Surname, Age FROM shvarov_copilot.Persistent")
-    Write tResultSet.%SQLCODE, !
-    Write tResultSet.%Message, !
+    //Write tResultSet.%SQLCODE, !
+    //Write tResultSet.%Message, !
     While tResultSet.%Next() {
 
         Set tRecord = ##class(%DynamicObject).%New()
